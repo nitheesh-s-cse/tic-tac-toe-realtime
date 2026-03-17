@@ -19,6 +19,9 @@ const leaveBtn = document.getElementById("leaveBtn");
 const boardEl = document.getElementById("board");
 const messageText = document.getElementById("messageText");
 const timerText = document.getElementById("timerText");
+const winnerModal = document.getElementById("winnerModal");
+const winnerName = document.getElementById("winnerName");
+const modalRestartBtn = document.getElementById("modalRestartBtn");
 
 let state = {
   roomId: "",
@@ -192,7 +195,13 @@ copyRoomBtn.addEventListener("click", async () => {
 
 leaveBtn.addEventListener("click", () => {
   stopTimer();
+  winnerModal.classList.add("hidden");
   window.location.reload();
+});
+
+modalRestartBtn.addEventListener("click", () => {
+  socket.emit("restartGame");
+  winnerModal.classList.add("hidden");
 });
 
 socket.on("joinedRoom", (data) => {
@@ -243,9 +252,13 @@ socket.on("gameUpdate", (data) => {
     if (data.result.winner === "draw") {
       // Swap symbol on draw
       state.symbol = state.symbol === "X" ? "O" : "X";
-      updateUI("It's a draw! Symbols swapped. Restart to play again.");
+      updateUI("It's a draw! Symbols swapped. Starting new round...");
     } else {
-      updateUI(`Player ${data.result.winner} wins! Restart to play again.`);
+      // Show winner modal
+      const winnerPlayer = data.players.find(p => p.symbol === data.result.winner);
+      winnerName.textContent = winnerPlayer ? winnerPlayer.name : data.result.winner;
+      winnerModal.classList.remove("hidden");
+      updateUI(`${data.result.winner} wins!`);
     }
   } else {
     updateUI();
@@ -263,6 +276,7 @@ socket.on("gameReset", (data) => {
     winnerCombo: data.winnerCombo || []
   };
 
+  winnerModal.classList.add("hidden");
   updateUI("New round started.");
 });
 

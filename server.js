@@ -204,8 +204,8 @@ io.on("connection", (socket) => {
         room.timerTimeout = null;
       }
 
-      // Auto-restart on draw or win/loss
-      if (result.winner === "draw" || result.winner) {
+      // Auto-restart on draw
+      if (result.winner === "draw") {
         setTimeout(() => {
           room.board = createEmptyBoard();
           room.gameOver = false;
@@ -218,7 +218,7 @@ io.on("connection", (socket) => {
             scores: room.scores,
             gameOver: room.gameOver,
             winnerCombo: room.winnerCombo,
-            message: result.winner === "draw" ? "Draw! Starting new round..." : "Starting new round..."
+            message: "Draw! Starting new round..."
           });
 
           // Start timer for new round
@@ -242,6 +242,36 @@ io.on("connection", (socket) => {
     });
 
     // Start timer for next turn
+    startTimer(roomId);
+  });
+
+  socket.on("restartGame", () => {
+    const roomId = socket.data.roomId;
+    if (!roomId) return;
+
+    const room = getRoomState(roomId);
+    if (!room) return;
+
+    // Clear timer
+    if (room.timerTimeout) {
+      clearTimeout(room.timerTimeout);
+      room.timerTimeout = null;
+    }
+
+    room.board = createEmptyBoard();
+    room.gameOver = false;
+    room.winnerCombo = [];
+
+    io.to(roomId).emit("gameReset", {
+      board: room.board,
+      currentTurn: room.currentTurn,
+      players: room.players,
+      scores: room.scores,
+      gameOver: room.gameOver,
+      winnerCombo: room.winnerCombo
+    });
+
+    // Start timer
     startTimer(roomId);
   });
 
