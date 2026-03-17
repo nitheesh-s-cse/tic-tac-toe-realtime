@@ -1,0 +1,23 @@
+{
+  "name": "realtime-xo-game",
+  "version": "1.0.0",
+  "description": "Real-time 2-player Tic Tac Toe game with beautiful UI/UX",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "tic-tac-toe",
+    "socket.io",
+    "realtime",
+    "game",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}

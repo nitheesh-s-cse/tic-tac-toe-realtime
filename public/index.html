@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realtime X O Game</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <main class="app-shell">
+      <section class="card hero-card" id="joinView">
+        <div class="brand">
+          <div class="brand-badge">XO</div>
+          <div>
+            <h1>Realtime Tic Tac Toe</h1>
+            <p class="subtitle">Play live with a friend in a private room</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="playerName">Your Name</label>
+            <input id="playerName" type="text" placeholder="Enter your name" maxlength="20" />
+          </div>
+
+          <div class="input-group">
+            <label for="roomId">Room ID</label>
+            <div class="room-row">
+              <input id="roomId" type="text" placeholder="Enter room code" maxlength="20" />
+              <button id="generateRoomBtn" class="secondary-btn" type="button">Generate</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="joinBtn" class="primary-btn">Create / Join Room</button>
+        <p class="helper-text">
+          Share the same Room ID with your friend to play together.
+        </p>
+      </section>
+
+      <section class="game-layout hidden" id="gameView">
+        <div class="top-bar card">
+          <div class="room-meta">
+            <div>
+              <p class="mini-label">Room</p>
+              <h2 id="roomCodeDisplay">-</h2>
+            </div>
+            <button id="copyRoomBtn" class="secondary-btn">Copy Room ID</button>
+          </div>
+
+          <div class="status-box">
+            <p class="mini-label">Game Status</p>
+            <h3 id="statusText">Waiting...</h3>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <aside class="sidebar card">
+            <div class="player-panel">
+              <h3>Players</h3>
+              <div id="playersList" class="players-list"></div>
+            </div>
+
+            <div class="score-panel">
+              <h3>Scoreboard</h3>
+              <div class="score-grid">
+                <div class="score-item">
+                  <span>X</span>
+                  <strong id="scoreX">0</strong>
+                </div>
+                <div class="score-item">
+                  <span>O</span>
+                  <strong id="scoreO">0</strong>
+                </div>
+                <div class="score-item">
+                  <span>Draw</span>
+                  <strong id="scoreDraw">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-panel">
+              <button id="restartBtn" class="primary-btn">Restart Match</button>
+              <button id="leaveBtn" class="ghost-btn">Leave Game</button>
+            </div>
+          </aside>
+
+          <section class="board-section card">
+            <div id="board" class="board"></div>
+            <p id="messageText" class="message-text">Waiting for players...</p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
