@@ -23,6 +23,9 @@ const winnerModal = document.getElementById("winnerModal");
 const winnerName = document.getElementById("winnerName");
 const modalRestartBtn = document.getElementById("modalRestartBtn");
 
+// Ensure modal is hidden on load
+winnerModal.classList.add("hidden");
+
 let state = {
   roomId: "",
   symbol: "",
