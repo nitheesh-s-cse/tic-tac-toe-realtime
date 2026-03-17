@@ -214,7 +214,9 @@ socket.on("gameUpdate", (data) => {
 
   if (data.result) {
     if (data.result.winner === "draw") {
-      updateUI("It's a draw! Restart to play again.");
+      // Swap symbol on draw
+      state.symbol = state.symbol === "X" ? "O" : "X";
+      updateUI("It's a draw! Symbols swapped. Restart to play again.");
     } else {
       updateUI(`Player ${data.result.winner} wins! Restart to play again.`);
     }
