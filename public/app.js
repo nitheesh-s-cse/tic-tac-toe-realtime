@@ -161,6 +161,9 @@ function updateUI(customMessage = "") {
     stopTimer();
     timerText.textContent = "10";
   }
+
+  // Disable restart button during play
+  restartBtn.disabled = !state.gameOver;
 }
 
 generateRoomBtn.addEventListener("click", () => {

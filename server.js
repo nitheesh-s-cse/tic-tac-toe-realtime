@@ -204,8 +204,8 @@ io.on("connection", (socket) => {
         room.timerTimeout = null;
       }
 
-      // Auto-restart on draw
-      if (result.winner === "draw") {
+      // Auto-restart on draw or win/loss
+      if (result.winner === "draw" || result.winner) {
         setTimeout(() => {
           room.board = createEmptyBoard();
           room.gameOver = false;
@@ -218,7 +218,7 @@ io.on("connection", (socket) => {
             scores: room.scores,
             gameOver: room.gameOver,
             winnerCombo: room.winnerCombo,
-            message: "Draw! Starting new round..."
+            message: result.winner === "draw" ? "Draw! Starting new round..." : "Starting new round..."
           });
 
           // Start timer for new round
