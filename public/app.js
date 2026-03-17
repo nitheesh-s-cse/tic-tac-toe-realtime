@@ -25,6 +25,7 @@ const modalRestartBtn = document.getElementById("modalRestartBtn");
 
 // Ensure modal is hidden on load
 winnerModal.classList.add("hidden");
+winnerModal.style.display = "none";
 
 let state = {
   roomId: "",
@@ -199,12 +200,14 @@ copyRoomBtn.addEventListener("click", async () => {
 leaveBtn.addEventListener("click", () => {
   stopTimer();
   winnerModal.classList.add("hidden");
+  winnerModal.style.display = "none";
   window.location.reload();
 });
 
 modalRestartBtn.addEventListener("click", () => {
   socket.emit("restartGame");
   winnerModal.classList.add("hidden");
+  winnerModal.style.display = "none";
 });
 
 socket.on("joinedRoom", (data) => {
@@ -223,6 +226,7 @@ socket.on("joinedRoom", (data) => {
   joinView.classList.add("hidden");
   gameView.classList.remove("hidden");
   winnerModal.classList.add("hidden");
+  winnerModal.style.display = "none";
   updateUI(`Joined room ${data.roomId} as ${data.symbol}.`);
 });
 
@@ -239,6 +243,7 @@ socket.on("roomUpdate", (data) => {
   };
 
   winnerModal.classList.add("hidden");
+  winnerModal.style.display = "none";
   updateUI(data.message || "");
 });
 
@@ -263,6 +268,7 @@ socket.on("gameUpdate", (data) => {
       const winnerPlayer = data.players.find(p => p.symbol === data.result.winner);
       winnerName.textContent = winnerPlayer ? winnerPlayer.name : data.result.winner;
       winnerModal.classList.remove("hidden");
+      winnerModal.style.display = "flex";
       updateUI(`${data.result.winner} wins!`);
     }
   } else {
@@ -282,6 +288,7 @@ socket.on("gameReset", (data) => {
   };
 
   winnerModal.classList.add("hidden");
+  winnerModal.style.display = "none";
   updateUI("New round started.");
 });
 
