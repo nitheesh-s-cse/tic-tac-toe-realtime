@@ -219,6 +219,7 @@ socket.on("joinedRoom", (data) => {
 
   joinView.classList.add("hidden");
   gameView.classList.remove("hidden");
+  winnerModal.classList.add("hidden");
   updateUI(`Joined room ${data.roomId} as ${data.symbol}.`);
 });
 
@@ -234,6 +235,7 @@ socket.on("roomUpdate", (data) => {
     winnerCombo: data.winnerCombo || []
   };
 
+  winnerModal.classList.add("hidden");
   updateUI(data.message || "");
 });
 
