@@ -209,7 +209,7 @@ button:active {
   gap: 14px;
 }
 
-.room-meta, .status-box {
+.room-meta, .status-box, .timer-box {
   display: flex;
   align-items: center;
   gap: 16px;

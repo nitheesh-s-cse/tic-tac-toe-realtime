@@ -47,6 +47,41 @@ function getRoomState(roomId) {
   return rooms[roomId];
 }
 
+function startTimer(roomId) {
+  const room = rooms[roomId];
+  if (!room) return;
+
+  if (room.timerTimeout) clearTimeout(room.timerTimeout);
+
+  room.timerTimeout = setTimeout(() => {
+    // Forfeit for current player
+    const currentPlayer = room.players.find(p => p.symbol === room.currentTurn);
+    const opponent = room.players.find(p => p.symbol !== room.currentTurn);
+    if (opponent) {
+      room.scores[opponent.symbol] += 1;
+    }
+
+    // Reset board
+    room.board = createEmptyBoard();
+    room.currentTurn = opponent ? opponent.symbol : "X";
+    room.gameOver = false;
+    room.winnerCombo = [];
+
+    io.to(roomId).emit("gameReset", {
+      board: room.board,
+      currentTurn: room.currentTurn,
+      players: room.players,
+      scores: room.scores,
+      gameOver: room.gameOver,
+      winnerCombo: room.winnerCombo,
+      message: `${currentPlayer ? currentPlayer.name : 'Player'} ran out of time. ${opponent ? opponent.name : 'Opponent'} wins!`
+    });
+
+    // Start timer for new turn
+    startTimer(roomId);
+  }, 10000);
+}
+
 function ensureRoom(roomId) {
   if (!rooms[roomId]) {
     rooms[roomId] = {
@@ -55,7 +90,8 @@ function ensureRoom(roomId) {
       currentTurn: "X",
       gameOver: false,
       winnerCombo: [],
-      scores: { X: 0, O: 0, draw: 0 }
+      scores: { X: 0, O: 0, draw: 0 },
+      timerTimeout: null
     };
   }
   return rooms[roomId];
@@ -108,6 +144,11 @@ io.on("connection", (socket) => {
           ? "Both players connected. Game starts now!"
           : `${playerData.name} joined as ${symbol}. Waiting for another player...`
     });
+
+    // Start timer when both players are connected
+    if (room.players.length === 2) {
+      startTimer(roomId);
+    }
   });
 
   socket.on("makeMove", ({ index }) => {
@@ -156,6 +197,35 @@ io.on("connection", (socket) => {
         result,
         winnerCombo: room.winnerCombo
       });
+
+      // Clear timer on game over
+      if (room.timerTimeout) {
+        clearTimeout(room.timerTimeout);
+        room.timerTimeout = null;
+      }
+
+      // Auto-restart on draw
+      if (result.winner === "draw") {
+        setTimeout(() => {
+          room.board = createEmptyBoard();
+          room.gameOver = false;
+          room.winnerCombo = [];
+
+          io.to(roomId).emit("gameReset", {
+            board: room.board,
+            currentTurn: room.currentTurn,
+            players: room.players,
+            scores: room.scores,
+            gameOver: room.gameOver,
+            winnerCombo: room.winnerCombo,
+            message: "Draw! Starting new round..."
+          });
+
+          // Start timer for new round
+          startTimer(roomId);
+        }, 2000); // 2 second delay
+      }
+
       return;
     }
 
@@ -170,6 +240,9 @@ io.on("connection", (socket) => {
       result: null,
       winnerCombo: []
     });
+
+    // Start timer for next turn
+    startTimer(roomId);
   });
 
   socket.on("restartGame", () => {
@@ -178,6 +251,12 @@ io.on("connection", (socket) => {
 
     const room = getRoomState(roomId);
     if (!room) return;
+
+    // Clear timer
+    if (room.timerTimeout) {
+      clearTimeout(room.timerTimeout);
+      room.timerTimeout = null;
+    }
 
     // Count as win for opponent
     const opponent = room.players.find(p => p.id !== socket.id);
@@ -198,6 +277,9 @@ io.on("connection", (socket) => {
       gameOver: room.gameOver,
       winnerCombo: room.winnerCombo
     });
+
+    // Start timer
+    startTimer(roomId);
   });
 
   socket.on("disconnect", () => {
@@ -205,6 +287,13 @@ io.on("connection", (socket) => {
     if (!roomId || !rooms[roomId]) return;
 
     const room = rooms[roomId];
+
+    // Clear timer
+    if (room.timerTimeout) {
+      clearTimeout(room.timerTimeout);
+      room.timerTimeout = null;
+    }
+
     // Count as win for opponent
     const opponent = room.players.find(p => p.id !== socket.id);
     if (opponent) {

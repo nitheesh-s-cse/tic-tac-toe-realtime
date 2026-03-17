@@ -19,6 +19,7 @@ const restartBtn = document.getElementById("restartBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const boardEl = document.getElementById("board");
 const messageText = document.getElementById("messageText");
+const timerText = document.getElementById("timerText");
 
 let state = {
   roomId: "",
@@ -28,11 +29,33 @@ let state = {
   players: [],
   scores: { X: 0, O: 0, draw: 0 },
   gameOver: false,
-  winnerCombo: []
+  winnerCombo: [],
+  timerInterval: null,
+  timerValue: 10
 };
 
 function generateRoomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function startTimer() {
+  stopTimer();
+  state.timerValue = 10;
+  timerText.textContent = state.timerValue;
+  state.timerInterval = setInterval(() => {
+    state.timerValue--;
+    timerText.textContent = state.timerValue;
+    if (state.timerValue <= 0) {
+      stopTimer();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
 }
 
 function renderBoard() {
@@ -130,6 +153,14 @@ function updateUI(customMessage = "") {
   renderPlayers();
   renderScores();
   renderStatus(customMessage);
+
+  // Start timer if it's player's turn and game is active
+  if (state.players.length === 2 && !state.gameOver && state.currentTurn === state.symbol) {
+    startTimer();
+  } else {
+    stopTimer();
+    timerText.textContent = "10";
+  }
 }
 
 generateRoomBtn.addEventListener("click", () => {
@@ -165,6 +196,7 @@ restartBtn.addEventListener("click", () => {
 });
 
 leaveBtn.addEventListener("click", () => {
+  stopTimer();
   window.location.reload();
 });
 
