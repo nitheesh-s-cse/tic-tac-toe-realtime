@@ -245,43 +245,6 @@ io.on("connection", (socket) => {
     startTimer(roomId);
   });
 
-  socket.on("restartGame", () => {
-    const roomId = socket.data.roomId;
-    if (!roomId) return;
-
-    const room = getRoomState(roomId);
-    if (!room) return;
-
-    // Clear timer
-    if (room.timerTimeout) {
-      clearTimeout(room.timerTimeout);
-      room.timerTimeout = null;
-    }
-
-    // Count as win for opponent
-    const opponent = room.players.find(p => p.id !== socket.id);
-    if (opponent) {
-      room.scores[opponent.symbol] += 1;
-      room.currentTurn = opponent.symbol;
-    }
-
-    room.board = createEmptyBoard();
-    room.gameOver = false;
-    room.winnerCombo = [];
-
-    io.to(roomId).emit("gameReset", {
-      board: room.board,
-      currentTurn: room.currentTurn,
-      players: room.players,
-      scores: room.scores,
-      gameOver: room.gameOver,
-      winnerCombo: room.winnerCombo
-    });
-
-    // Start timer
-    startTimer(roomId);
-  });
-
   socket.on("disconnect", () => {
     const roomId = socket.data.roomId;
     if (!roomId || !rooms[roomId]) return;

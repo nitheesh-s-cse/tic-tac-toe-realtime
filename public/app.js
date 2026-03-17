@@ -15,7 +15,6 @@ const playersList = document.getElementById("playersList");
 const scoreX = document.getElementById("scoreX");
 const scoreO = document.getElementById("scoreO");
 const scoreDraw = document.getElementById("scoreDraw");
-const restartBtn = document.getElementById("restartBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const boardEl = document.getElementById("board");
 const messageText = document.getElementById("messageText");
@@ -161,9 +160,6 @@ function updateUI(customMessage = "") {
     stopTimer();
     timerText.textContent = "10";
   }
-
-  // Disable restart button during play
-  restartBtn.disabled = !state.gameOver;
 }
 
 generateRoomBtn.addEventListener("click", () => {
@@ -192,10 +188,6 @@ copyRoomBtn.addEventListener("click", async () => {
   } catch {
     alert("Could not copy room ID.");
   }
-});
-
-restartBtn.addEventListener("click", () => {
-  socket.emit("restartGame");
 });
 
 leaveBtn.addEventListener("click", () => {
