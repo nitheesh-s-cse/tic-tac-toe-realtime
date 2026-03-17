@@ -132,6 +132,17 @@ io.on("connection", (socket) => {
 
       if (result.winner === "draw") {
         room.scores.draw += 1;
+        // Swap symbols for draw
+        if (room.players.length === 2) {
+          room.players[0].symbol = room.players[0].symbol === "X" ? "O" : "X";
+          room.players[1].symbol = room.players[1].symbol === "X" ? "O" : "X";
+          // Update socket data
+          const socket0 = io.sockets.sockets.get(room.players[0].id);
+          const socket1 = io.sockets.sockets.get(room.players[1].id);
+          if (socket0) socket0.data.symbol = room.players[0].symbol;
+          if (socket1) socket1.data.symbol = room.players[1].symbol;
+        }
+        room.currentTurn = "X";
       } else {
         room.scores[result.winner] += 1;
       }
@@ -168,8 +179,14 @@ io.on("connection", (socket) => {
     const room = getRoomState(roomId);
     if (!room) return;
 
+    // Count as win for opponent
+    const opponent = room.players.find(p => p.id !== socket.id);
+    if (opponent) {
+      room.scores[opponent.symbol] += 1;
+      room.currentTurn = opponent.symbol;
+    }
+
     room.board = createEmptyBoard();
-    room.currentTurn = "X";
     room.gameOver = false;
     room.winnerCombo = [];
 
@@ -188,6 +205,12 @@ io.on("connection", (socket) => {
     if (!roomId || !rooms[roomId]) return;
 
     const room = rooms[roomId];
+    // Count as win for opponent
+    const opponent = room.players.find(p => p.id !== socket.id);
+    if (opponent) {
+      room.scores[opponent.symbol] += 1;
+    }
+
     room.players = room.players.filter((p) => p.id !== socket.id);
 
     io.to(roomId).emit("roomUpdate", {
